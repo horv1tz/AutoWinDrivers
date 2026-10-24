@@ -38,6 +38,10 @@ impl DeviceSource for CfgMgrDeviceSource {
         let ids = device_instance_ids(!options.include_not_present)?;
         let mut devices = Vec::with_capacity(ids.len());
         for id in ids {
+            // The root of the device tree is not a device; Device Manager hides it too.
+            if id.len() >= 6 && id[..6].eq_ignore_ascii_case("HTREE\\") {
+                continue;
+            }
             if let Some(node) = DevNode::locate(&id)? {
                 devices.push(node.read_device(id)?);
             }

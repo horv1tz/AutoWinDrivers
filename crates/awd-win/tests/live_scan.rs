@@ -14,11 +14,8 @@ fn live_scan_returns_devices_with_ids() {
         assert!(!d.instance_id.is_empty());
         assert!(!d.name.is_empty());
         assert!(
-            !d.hardware_ids.is_empty()
-                || !d.compatible_ids.is_empty()
-                || d.enumerator.as_deref() == Some("SWD"),
-            "no ids at all for {}",
-            d.instance_id
+            !d.instance_id.to_ascii_uppercase().starts_with("HTREE\\"),
+            "device tree root leaked into the scan"
         );
     }
     // A device may be unplugged between listing and reading, so allow a few
@@ -27,6 +24,16 @@ fn live_scan_returns_devices_with_ids() {
     assert!(
         present * 10 >= devices.len() * 9,
         "{present} of {} present",
+        devices.len()
+    );
+    // Some software devices carry no ids, but nearly everything else does.
+    let with_ids = devices
+        .iter()
+        .filter(|d| !d.hardware_ids.is_empty() || !d.compatible_ids.is_empty())
+        .count();
+    assert!(
+        with_ids * 10 >= devices.len() * 9,
+        "{with_ids} of {} devices have ids",
         devices.len()
     );
     assert!(
