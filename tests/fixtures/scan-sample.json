@@ -1,0 +1,198 @@
+{
+  "scanned_at": "2026-10-24T12:00:00Z",
+  "host": {
+    "hostname": "DESKTOP-SAMPLE",
+    "os": "Windows 11 Pro 24H2 (build 26100)",
+    "arch": "x86_64"
+  },
+  "devices": [
+    {
+      "instance_id": "PCI\\VEN_10DE&DEV_2684&SUBSYS_167F10DE&REV_A1\\4&2283F625&0&0019",
+      "name": "NVIDIA GeForce RTX 4090",
+      "description": "NVIDIA GeForce RTX 4090",
+      "class": "Display",
+      "class_guid": "4d36e968-e325-11ce-bfc1-08002be10318",
+      "manufacturer": "NVIDIA",
+      "enumerator": "PCI",
+      "hardware_ids": [
+        "PCI\\VEN_10DE&DEV_2684&SUBSYS_167F10DE&REV_A1",
+        "PCI\\VEN_10DE&DEV_2684&SUBSYS_167F10DE",
+        "PCI\\VEN_10DE&DEV_2684&CC_030000",
+        "PCI\\VEN_10DE&DEV_2684&CC_0300"
+      ],
+      "compatible_ids": [
+        "PCI\\VEN_10DE&DEV_2684&REV_A1",
+        "PCI\\VEN_10DE&DEV_2684",
+        "PCI\\VEN_10DE&CC_030000",
+        "PCI\\VEN_10DE&CC_0300",
+        "PCI\\VEN_10DE",
+        "PCI\\CC_030000",
+        "PCI\\CC_0300"
+      ],
+      "location": "PCI bus 1, device 0, function 0",
+      "parent": "PCI\\VEN_8086&DEV_A70D&SUBSYS_00000000&REV_01\\3&11583659&0&08",
+      "present": true,
+      "devnode_status": 25165834,
+      "status": { "kind": "ok" },
+      "driver": {
+        "provider": "NVIDIA",
+        "description": "NVIDIA GeForce RTX 4090",
+        "version": "32.0.15.6094",
+        "date": "2024-08-14",
+        "inf_path": "oem12.inf",
+        "inf_section": "Section001",
+        "matching_device_id": "PCI\\VEN_10DE&DEV_2684",
+        "rank": 16711680,
+        "is_inbox": false
+      }
+    },
+    {
+      "instance_id": "USB\\VID_1A86&PID_7523\\5&2F0B8F0&0&3",
+      "name": "USB2.0-Serial",
+      "description": "USB2.0-Serial",
+      "enumerator": "USB",
+      "hardware_ids": [
+        "USB\\VID_1A86&PID_7523&REV_0264",
+        "USB\\VID_1A86&PID_7523"
+      ],
+      "compatible_ids": [
+        "USB\\Class_FF&SubClass_01&Prot_02",
+        "USB\\Class_FF&SubClass_01",
+        "USB\\Class_FF"
+      ],
+      "location": "Port_#0003.Hub_#0001",
+      "parent": "USB\\ROOT_HUB30\\4&36C4AEE7&0&0",
+      "present": true,
+      "devnode_status": 1120,
+      "status": { "kind": "problem", "code": 28 }
+    },
+    {
+      "instance_id": "USB\\VID_8087&PID_0033\\5&2F0B8F0&0&14",
+      "name": "Intel(R) Wireless Bluetooth(R)",
+      "description": "Intel(R) Wireless Bluetooth(R)",
+      "class": "Bluetooth",
+      "class_guid": "e0cbf06c-cd8b-4647-bb8a-263b43f0f974",
+      "manufacturer": "Intel Corporation",
+      "enumerator": "USB",
+      "hardware_ids": [
+        "USB\\VID_8087&PID_0033&REV_0000",
+        "USB\\VID_8087&PID_0033"
+      ],
+      "compatible_ids": [
+        "USB\\Class_E0&SubClass_01&Prot_01",
+        "USB\\Class_E0&SubClass_01",
+        "USB\\Class_E0"
+      ],
+      "location": "Port_#0014.Hub_#0001",
+      "parent": "USB\\ROOT_HUB30\\4&36C4AEE7&0&0",
+      "present": true,
+      "devnode_status": 25167880,
+      "status": { "kind": "disabled" },
+      "driver": {
+        "provider": "Intel Corporation",
+        "description": "Intel(R) Wireless Bluetooth(R)",
+        "version": "23.60.0.3",
+        "date": "2024-06-12",
+        "inf_path": "oem31.inf",
+        "inf_section": "ibtusb_Device_Install",
+        "matching_device_id": "USB\\VID_8087&PID_0033",
+        "rank": 16719872,
+        "is_inbox": false
+      }
+    },
+    {
+      "instance_id": "ACPI\\PNP0C0A\\1",
+      "name": "Microsoft ACPI-Compliant Control Method Battery",
+      "description": "Microsoft ACPI-Compliant Control Method Battery",
+      "class": "Battery",
+      "class_guid": "72631e54-78a4-11d0-bcf7-00aa00b7b32a",
+      "manufacturer": "Microsoft",
+      "enumerator": "ACPI",
+      "hardware_ids": [
+        "ACPI\\PNP0C0A",
+        "*PNP0C0A"
+      ],
+      "compatible_ids": [],
+      "parent": "ACPI\\PNP0A08\\0",
+      "present": true,
+      "devnode_status": 25165834,
+      "status": { "kind": "ok" },
+      "driver": {
+        "provider": "Microsoft",
+        "description": "Microsoft ACPI-Compliant Control Method Battery",
+        "version": "10.0.26100.1",
+        "date": "2006-06-21",
+        "inf_path": "cmbatt.inf",
+        "inf_section": "CmBatt_Inst",
+        "matching_device_id": "ACPI\\PNP0C0A",
+        "rank": 16719872,
+        "is_inbox": true
+      }
+    },
+    {
+      "instance_id": "HID\\VID_046D&PID_C52B&MI_01&COL01\\8&1C2F0B3&0&0000",
+      "name": "HID-compliant mouse",
+      "description": "HID-compliant mouse",
+      "class": "Mouse",
+      "class_guid": "4d36e96f-e325-11ce-bfc1-08002be10318",
+      "manufacturer": "Microsoft",
+      "enumerator": "HID",
+      "hardware_ids": [
+        "HID\\VID_046D&PID_C52B&REV_1201&MI_01&Col01",
+        "HID\\VID_046D&PID_C52B&MI_01&Col01",
+        "HID\\VID_046D&UP:0001_U:0002",
+        "HID_DEVICE_SYSTEM_MOUSE",
+        "HID_DEVICE_UP:0001_U:0002",
+        "HID_DEVICE"
+      ],
+      "compatible_ids": [],
+      "parent": "USB\\VID_046D&PID_C52B&MI_01\\7&2A1F0C9&0&0001",
+      "present": true,
+      "devnode_status": 25165834,
+      "status": { "kind": "ok" },
+      "driver": {
+        "provider": "Microsoft",
+        "description": "HID-compliant mouse",
+        "version": "10.0.26100.1",
+        "date": "2006-06-21",
+        "inf_path": "msmouse.inf",
+        "inf_section": "HID_Mouse_Inst",
+        "matching_device_id": "HID_DEVICE_SYSTEM_MOUSE",
+        "rank": 16728067,
+        "is_inbox": true
+      }
+    },
+    {
+      "instance_id": "USB\\VID_0781&PID_5581\\0401384A2B1C5E9D",
+      "name": "USB Mass Storage Device",
+      "description": "USB Mass Storage Device",
+      "class": "USB",
+      "class_guid": "36fc9e60-c465-11cf-8056-444553540000",
+      "manufacturer": "Compatible USB storage device",
+      "enumerator": "USB",
+      "hardware_ids": [
+        "USB\\VID_0781&PID_5581&REV_0100",
+        "USB\\VID_0781&PID_5581"
+      ],
+      "compatible_ids": [
+        "USB\\Class_08&SubClass_06&Prot_50",
+        "USB\\Class_08&SubClass_06",
+        "USB\\Class_08"
+      ],
+      "parent": "USB\\ROOT_HUB30\\4&36C4AEE7&0&0",
+      "present": false,
+      "status": { "kind": "not_present" },
+      "driver": {
+        "provider": "Microsoft",
+        "description": "USB Mass Storage Device",
+        "version": "10.0.26100.1",
+        "date": "2006-06-21",
+        "inf_path": "usbstor.inf",
+        "inf_section": "USBSTOR_BULK",
+        "matching_device_id": "USB\\Class_08&SubClass_06&Prot_50",
+        "rank": 16728065,
+        "is_inbox": true
+      }
+    }
+  ]
+}

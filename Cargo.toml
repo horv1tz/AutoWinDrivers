@@ -1,0 +1,36 @@
+[workspace]
+resolver = "3"
+members = ["crates/awd-core", "crates/awd-win", "crates/awd-cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/horv1tz/AutoWinDrivers"
+authors = ["AutoWinDrivers contributors"]
+
+[workspace.dependencies]
+awd-core = { path = "crates/awd-core", version = "0.1.0" }
+awd-win = { path = "crates/awd-win", version = "0.1.0" }
+
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+uuid = { version = "1", features = ["serde"] }
+windows = "0.62"
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+undocumented_unsafe_blocks = "warn"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

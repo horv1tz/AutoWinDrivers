@@ -1,0 +1,24 @@
+[package]
+name = "awd-win"
+description = "Windows back end for AutoWinDrivers: device enumeration via CfgMgr32 (all unsafe FFI lives here)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+awd-core.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows = { workspace = true, features = [
+  "Win32_Devices_DeviceAndDriverInstallation",
+  "Win32_Devices_Properties",
+  "Win32_Foundation",
+] }
+
+[lints]
+workspace = true
