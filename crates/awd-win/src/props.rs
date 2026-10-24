@@ -1,4 +1,7 @@
 //! Decoders for raw `DEVPROP_TYPE_*` property buffers.
+//!
+//! Pure functions over byte slices, so they compile and are tested on every
+//! platform even though only the Windows back end produces such buffers.
 
 use chrono::{DateTime, NaiveDate};
 use uuid::Uuid;
@@ -100,10 +103,17 @@ mod tests {
 
     #[test]
     fn decodes_filetime() {
-        // 2006-06-21 00:00:00 UTC, the date stamped on every inbox driver.
-        let ticks: u64 = 127_955_808_000_000_000;
-        let date = filetime_date(&ticks.to_le_bytes()).unwrap();
-        assert_eq!(date, NaiveDate::from_ymd_opt(2006, 6, 21).unwrap());
+        // 2006-06-21, the date stamped on every inbox driver: build the
+        // FILETIME from the date instead of trusting a hand-computed constant.
+        let expected = NaiveDate::from_ymd_opt(2006, 6, 21).unwrap();
+        let unix_secs = expected.and_hms_opt(0, 0, 0).unwrap().and_utc().timestamp();
+        let ticks = (u64::try_from(unix_secs).unwrap() + 11_644_473_600) * 10_000_000;
+        assert_eq!(filetime_date(&ticks.to_le_bytes()), Some(expected));
+        // Known reference value: 2006-06-21 00:00:00 UTC.
+        assert_eq!(
+            filetime_date(&127_953_216_000_000_000u64.to_le_bytes()),
+            Some(expected)
+        );
         assert!(filetime_date(&[1, 2, 3]).is_none());
     }
 

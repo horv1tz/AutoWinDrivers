@@ -7,8 +7,7 @@
 
 #[cfg(windows)]
 mod cfgmgr;
-#[cfg(windows)]
-mod props;
+pub mod props;
 
 #[cfg(windows)]
 pub use cfgmgr::CfgMgrDeviceSource;
