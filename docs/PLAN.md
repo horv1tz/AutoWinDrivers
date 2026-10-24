@@ -12,7 +12,7 @@
 |---|---|
 | Язык | Rust (stable, edition 2024), Cargo workspace |
 | Windows API | крейт `windows` (windows-rs): SetupAPI / CfgMgr32 / WUA COM / WinTrust / WinRT |
-| UI | **Tauri 2 + Svelte 5 + Tailwind**, стиль Fluent 2 / Windows 11 (Mica, системный акцент, тёмная/светлая тема). Альтернатива на 100 % Rust — Dioxus (см. открытые вопросы) |
+| UI | **Tauri 2 + Svelte 5 + Tailwind**, стиль Fluent 2 / Windows 11 (Mica, системный акцент, тёмная/светлая тема). Решение зафиксировано в [ADR-001](adr/001-ui-stack.md) |
 | Источники драйверов v1 | Windows Update Agent (официальный COM API) → Microsoft Update Catalog → локальный DriverStore / папки с INF |
 | Источники v2 | вендоры (NVIDIA, AMD, Intel, Realtek), офлайн‑драйверпаки |
 | Установка | WUA Installer / `pnputil` / `DiInstallDriver` / `UpdateDriverForPlugAndPlayDevices`, только подписанные драйверы, точка восстановления + бэкап перед установкой |
@@ -39,7 +39,7 @@
 - Безопасность по умолчанию: никаких неподписанных драйверов, никаких отключений проверки подписи, только HTTPS, проверка хешей загрузок.
 - Отзывчивый UI: сканирование и поиск не блокируют интерфейс, прогресс по каждой операции.
 - Локализация: RU + EN с первого релиза.
-- Телеметрия — только opt‑in (крэш‑репорты), по умолчанию выключена.
+- Без телеметрии и крэш‑репортов: диагностика собирается локально и отправляется только руками пользователя ([ADR-003](adr/003-defaults-and-license.md)).
 - Один установщик (MSI/NSIS) + портативная версия, автообновление с проверкой подписи.
 
 ### 1.3 Вне скоупа v1
@@ -47,6 +47,8 @@
 - Linux/macOS.
 - Свой хостинг драйверов (только официальные источники, ничего не раздаём сами).
 - Установка драйверов в офлайн‑образ (DISM) — кандидат на v2.
+- Офлайн‑драйверпаки — v2.
+- Телеметрия и крэш‑репорты.
 - BIOS/UEFI‑прошивки.
 
 ---
@@ -59,7 +61,7 @@
 
 Вся бизнес‑логика, работа с Windows API, сеть, установка — в Rust‑крейтах, которые не знают про UI. Фронтенд — тонкий слой отображения.
 
-Если принципиально нужно 100 % Rust без TypeScript — **Dioxus 0.6+** (тот же WebView2, разметка RSX на Rust, Tailwind). Цена: меньше готовых компонентов и анимаций, больше ручной работы ради того же вида. Решение надо принять до начала этапа 4 (см. §11).
+Если принципиально нужно 100 % Rust без TypeScript — **Dioxus 0.6+** (тот же WebView2, разметка RSX на Rust, Tailwind). Цена: меньше готовых компонентов и анимаций, больше ручной работы ради того же вида. **Решение принято: Tauri 2 + Svelte**, подробности и целевые метрики производительности — в [ADR-001](adr/001-ui-stack.md).
 
 ### 2.2 Работа с устройствами
 
@@ -122,14 +124,14 @@ Selected → PreflightChecks → RestorePoint → Backup → Download → Verify
   - из INF — `DiInstallDriverW` (newdev.dll) для добавления в DriverStore + `UpdateDriverForPlugAndPlayDevicesW` для адресной установки на конкретный HWID; `pnputil /add-driver /install` как запасной путь;
   - `.exe` вендора — запуск с тихими ключами, иначе интерактивно с подсказками.
 - **Откат:** `DiRollbackDriver`, либо восстановление из бэкапа.
-- **Права:** UI работает без админа. Привилегированные операции выполняет отдельный процесс‑воркер `awd-worker`, который запускается через UAC один раз на сессию и общается с UI по именованному каналу (JSON‑RPC, `awd-ipc`). Так UAC‑окно показывается один раз, а не на каждое действие, и трей‑агент не висит под админом постоянно. На этапе 3 допускается упрощение (манифест `requireAdministrator`), разделение — до релиза.
+- **Права:** UI работает без админа. Привилегированные операции выполняет отдельный процесс‑воркер `awd-worker`, который запускается через UAC один раз на сессию и общается с UI по именованному каналу (JSON‑RPC, `awd-ipc`). Так UAC‑окно показывается один раз, а не на каждое действие, и трей‑агент не висит под админом постоянно. На этапе 3 допускается упрощение (манифест `requireAdministrator`), разделение — до релиза ([ADR-002](adr/002-privileges.md)).
 
 ### 2.6 Мониторинг новых устройств
 
 - `CM_Register_Notification` с фильтром `CM_NOTIFY_FILTER_TYPE_DEVICEINSTANCE` + `CM_NOTIFY_FILTER_FLAG_ALL_DEVICE_INSTANCES` — колбэки `DEVICEINSTANCEENUMERATED / STARTED / REMOVED` без окна и message loop. Запас — `RegisterDeviceNotificationW` (`WM_DEVICECHANGE`) и WMI `Win32_DeviceChangeEvent`.
 - Дебаунс 3–5 с (Windows сама пытается поставить драйвер через WU), затем перечитываем узел: если `CM_PROB_FAILED_INSTALL` / `NOT_CONFIGURED` / `FAILED_START` — запускаем поиск.
 - Уведомление — WinRT `ToastNotification` с кнопками «Установить» / «Подробнее» / «Игнорировать это устройство» (через `tauri-plugin-notification`; регистрацию AUMID для непакетированного приложения проверить отдельно на этапе 5).
-- Политики: «Спрашивать» (по умолчанию) / «Ставить автоматически только WHQL из Windows Update» / «Только уведомлять».
+- Агент включается по желанию пользователя: по умолчанию выключен, предлагается при первом запуске и в настройках. Политики при включённом агенте: «Спрашивать» (по умолчанию) / «Ставить автоматически только WHQL из Windows Update» / «Только уведомлять».
 - Автозапуск — задача Планировщика при входе пользователя (без UAC‑окна при старте), опционально ключ `Run`.
 - Журнал событий: что подключили, что нашли, что сделали.
 
@@ -281,14 +283,18 @@ pub struct DriverCandidate {
 
 ---
 
-## 8. Открытые вопросы (нужно подтвердить)
+## 8. Принятые решения
 
-1. **UI‑стек:** Tauri 2 + Svelte/TS (рекомендую) или 100 % Rust через Dioxus? Влияет на этап 4.
-2. **Лицензия репозитория:** MIT / Apache‑2.0 (предполагаю open source) или проприетарно?
-3. **Политика автоустановки по умолчанию** для агента: «спрашивать» (предполагаю) или «ставить WHQL из WU автоматически»?
-4. **Офлайн‑драйверпаки** (формат SDI) — нужны в v1 или достаточно v2?
-5. **Телеметрия/крэш‑репорты** (Sentry, opt‑in) — делать или совсем без неё?
-6. **Название/брендинг** — остаётся AutoWinDrivers? Нужны иконка и логотип к этапу 4.
+| Вопрос | Решение | Где зафиксировано |
+|---|---|---|
+| UI‑стек | Tauri 2 + Svelte 5 + Tailwind; критерии — производительность и внешний вид | [ADR-001](adr/001-ui-stack.md) |
+| Лицензия | только открытая: MIT OR Apache‑2.0 | [ADR-003](adr/003-defaults-and-license.md), `LICENSE-MIT`, `LICENSE-APACHE` |
+| Агент мониторинга | по желанию пользователя: выключен по умолчанию, при включении — политика «Спрашивать» | [ADR-003](adr/003-defaults-and-license.md) |
+| Офлайн‑драйверпаки | не в v1 | §1.3, этап 7 |
+| Телеметрия | нет | [ADR-003](adr/003-defaults-and-license.md) |
+| Модель прав | UI без админа + отдельный воркер | [ADR-002](adr/002-privileges.md) |
+
+Открытым остаётся только брендинг: иконка и логотип нужны к этапу 4.
 
 ---
 
@@ -296,34 +302,49 @@ pub struct DriverCandidate {
 
 ```
 AutoWinDrivers/
-├─ Cargo.toml                 # workspace
-├─ rust-toolchain.toml
-├─ deny.toml
+├─ Cargo.toml                 # workspace            ✔
+├─ rust-toolchain.toml                               ✔
+├─ deny.toml                                         ✔
+├─ LICENSE-MIT, LICENSE-APACHE                       ✔
 ├─ crates/
-│  ├─ awd-core/
-│  ├─ awd-win/
-│  ├─ awd-providers/
-│  ├─ awd-ipc/
-│  ├─ awd-worker/
-│  ├─ awd-agent/
-│  └─ awd-cli/
+│  ├─ awd-core/               ✔ модель, HWID, коды проблем, версии, отчёт
+│  ├─ awd-win/                ✔ перечисление через CfgMgr32
+│  ├─ awd-cli/                ✔ `awd scan`, `awd problem`
+│  ├─ awd-providers/          этап 2
+│  ├─ awd-ipc/                этап 3
+│  ├─ awd-worker/             этап 3
+│  └─ awd-agent/              этап 5
 ├─ apps/
-│  └─ desktop/                # Tauri 2: src/ (Svelte), src-tauri/
+│  └─ desktop/                этап 4: Tauri 2, src/ (Svelte), src-tauri/
 ├─ docs/
 │  ├─ PLAN.md                 # этот документ
-│  ├─ adr/                    # архитектурные решения
-│  └─ design/                 # макеты, дизайн-система
-├─ tests/fixtures/            # INF, HTML Catalog, дампы устройств
-└─ .github/workflows/         # ci.yml, release.yml
+│  ├─ adr/                    ✔ 001 UI-стек, 002 права, 003 лицензия и политики
+│  └─ design/                 макеты, дизайн-система
+├─ tests/fixtures/            ✔ scan-sample.json; далее INF, HTML Catalog
+└─ .github/workflows/         ✔ ci.yml; release.yml — этап 6
 ```
 
 ---
 
-## 10. Ближайшие шаги (этап 0)
+## 10. Этап 0 — статус
 
-1. Подтвердить открытые вопросы §8 (хотя бы п.1 и п.2).
-2. Создать workspace, `rust-toolchain.toml`, CI с матрицей Ubuntu + Windows, `clippy -D warnings`.
-3. `awd-win`: перечисление устройств + базовые `DEVPKEY_*` + коды проблем; `awd-cli scan --json`.
-4. `awd-core`: модель `Device`, `HardwareId`, `CmProblem` с текстами; первые тесты.
-5. Макеты экранов «Обзор» и «Устройства» в светлой и тёмной теме.
-6. ADR‑001 «Выбор UI‑стека», ADR‑002 «Модель прав и воркер».
+| Шаг | Статус |
+|---|---|
+| Решения по открытым вопросам | ✔ §8, `docs/adr/` |
+| Workspace, `rust-toolchain.toml`, `deny.toml`, CI (fmt, clippy `-D warnings`, тесты на Ubuntu + Windows, кросс‑`check` под x64 и ARM64, cargo‑deny) | ✔ |
+| `awd-core`: `Device`, `HardwareId`, `ProblemCode` (57 кодов, RU/EN, severity, действие), `DriverVersion`, `ScanReport`; юнит‑тесты | ✔ |
+| `awd-win`: перечисление через `CM_Get_Device_ID_ListW` / `CM_Get_DevNode_PropertyW` / `CM_Get_DevNode_Status`, фантомные устройства, установленный драйвер; live‑тесты на Windows‑раннере | ✔ |
+| `awd-cli`: `awd scan [--all] [--problems] [--class X] [--json] [-o file] [--input file]`, `awd problem <code> --lang ru` | ✔ |
+| ADR‑001 UI‑стек, ADR‑002 права, ADR‑003 лицензия и политики | ✔ |
+| Макеты экранов «Обзор» и «Устройства» (светлая/тёмная) | ⏳ открыто |
+
+Что проверено: сборка, clippy и тесты на Linux; `cargo clippy` для `x86_64-pc-windows-msvc` и `aarch64-pc-windows-msvc`; `cargo deny`.
+Что **не** проверено локально: запуск на реальной Windows — это делает CI (`windows-latest`) и первый ручной прогон `cargo run -p awd-cli -- scan`.
+
+## 11. Следующий шаг — этап 1 (движок устройств)
+
+1. Прогнать `awd scan --all --json -o scan.json` на реальных Win10/Win11 и положить обезличенные дампы в `tests/fixtures/`.
+2. Подпись установленного драйвера через `WinVerifyTrust` по `.cat` из DriverStore.
+3. Сводка о ПК (CPU, GPU, RAM, плата, версия Windows) для дашборда.
+4. Группировка по классам с иконками классов, расшифровка `DN_*` флагов.
+5. Макеты UI (перенесено из этапа 0).
